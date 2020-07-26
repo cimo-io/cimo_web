@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <canvas id="myCanvas" width="300" height="300"
+        style="width: 300px; height: 300px; background-color: black;"></canvas>
+</body>
+<script src="../dist/bundle.js"></script>
+<script>
+    const codec = new cimo.Encoder({ width: 300, height: 300 });
+    codec.setFillStyle(255, 0, 0, 255);
+    codec.fillRect(0, 0, 150, 150);
+    const data = codec.build();
+    console.log(data);
+
+    const decoder = new cimo.Decoder(data);
+
+    const ctx = document.getElementById("myCanvas").getContext('2d')
+    const renderer = new cimo.Renderer(decoder, ctx)
+
+</script>
+
+</html>
