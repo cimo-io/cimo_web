@@ -1,10 +1,8 @@
-const _2BytesToInt = (value: number[] | Uint8Array): number => {
-  return value[0] * 256 + value[1];
-};
+// Copyright 2020 The CIMO Authors. All rights reserved.
+// Use of this source code is governed by a GPLV3.0 license that can be
+// found in the LICENSE file.
 
-const _3BytesToInt = (value: number[] | Uint8Array): number => {
-  return value[0] * 256 * 256 + value[1] * 256 + value[2];
-};
+import { _2BytesToInt, _3BytesToInt } from "../utils";
 
 export class Decoder {
   width?: number;

@@ -9,20 +9,23 @@
 
 <body>
     <canvas id="myCanvas" width="300" height="300"
-        style="width: 300px; height: 300px; background-color: black;"></canvas>
+        style="width: 300px; height: 300px; background-color: white;"></canvas>
 </body>
 <script src="../dist/bundle.js"></script>
 <script>
-    const codec = new cimo.Encoder({ width: 300, height: 300 });
-    codec.setFillStyle(255, 0, 0, 255);
-    codec.fillRect(0, 0, 150, 150);
-    const data = codec.build();
+    const ctx = new cimo.Encoder({ width: 300, height: 300 });
+
+    ctx.fillRect(25, 25, 100, 100);
+    ctx.clearRect(45, 45, 60, 60);
+    ctx.strokeRect(50, 50, 50, 50);
+
+    const data = ctx.build();
     console.log(data);
 
     const decoder = new cimo.Decoder(data);
 
-    const ctx = document.getElementById("myCanvas").getContext('2d')
-    const renderer = new cimo.Renderer(decoder, ctx)
+    const ctx2 = document.getElementById("myCanvas").getContext('2d')
+    const renderer = new cimo.Renderer(decoder, ctx2)
 
 </script>
 
