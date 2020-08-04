@@ -23,6 +23,20 @@ import {
   kSetShadowBlurTag,
   kSetShadowColorTag,
   kClearRectTag,
+  kSetLineCapTag,
+  kSetLineJoinTag,
+  kBeginPathTag,
+  kClosePathTag,
+  kStrokeTag,
+  kFillTag,
+  kLineToTag,
+  kMoveToTag,
+  kRectTag,
+  kQuadraticCurveToTag,
+  kBezierCurveToTag,
+  kArcTag,
+  kArcToTag,
+  kClipTag,
 } from "../macros";
 import { _2BytesToInt, _8BytesToDouble } from "../utils";
 
@@ -161,6 +175,46 @@ export class Renderer {
             this.renderingContext.lineWidth = v;
           }
           break;
+        case kSetLineCapTag:
+          {
+            const { v } = {
+              v: body[0],
+            };
+            switch (v) {
+              case 0:
+                this.renderingContext.lineCap = "butt";
+                break;
+              case 1:
+                this.renderingContext.lineCap = "round";
+                break;
+              case 2:
+                this.renderingContext.lineCap = "square";
+                break;
+              default:
+                break;
+            }
+          }
+          break;
+        case kSetLineJoinTag:
+          {
+            const { v } = {
+              v: body[0],
+            };
+            switch (v) {
+              case 0:
+                this.renderingContext.lineJoin = "round";
+                break;
+              case 1:
+                this.renderingContext.lineJoin = "bevel";
+                break;
+              case 2:
+                this.renderingContext.lineJoin = "miter";
+                break;
+              default:
+                break;
+            }
+          }
+          break;
         case kSetMiterLimitTag:
           {
             const { v } = {
@@ -209,10 +263,10 @@ export class Renderer {
         case kFillRectTag:
           {
             const { x, y, width, height } = {
-              x: _2BytesToInt([body[0], body[1]]),
-              y: _2BytesToInt([body[2], body[3]]),
-              width: _2BytesToInt([body[4], body[5]]),
-              height: _2BytesToInt([body[6], body[7]]),
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+              width: _8BytesToDouble(body.subarray(16, 24)),
+              height: _8BytesToDouble(body.subarray(24, 32)),
             };
             this.renderingContext.fillRect(x, y, width, height);
           }
@@ -220,10 +274,10 @@ export class Renderer {
         case kStrokeRectTag:
           {
             const { x, y, width, height } = {
-              x: _2BytesToInt([body[0], body[1]]),
-              y: _2BytesToInt([body[2], body[3]]),
-              width: _2BytesToInt([body[4], body[5]]),
-              height: _2BytesToInt([body[6], body[7]]),
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+              width: _8BytesToDouble(body.subarray(16, 24)),
+              height: _8BytesToDouble(body.subarray(24, 32)),
             };
             this.renderingContext.strokeRect(x, y, width, height);
           }
@@ -231,12 +285,115 @@ export class Renderer {
         case kClearRectTag:
           {
             const { x, y, width, height } = {
-              x: _2BytesToInt([body[0], body[1]]),
-              y: _2BytesToInt([body[2], body[3]]),
-              width: _2BytesToInt([body[4], body[5]]),
-              height: _2BytesToInt([body[6], body[7]]),
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+              width: _8BytesToDouble(body.subarray(16, 24)),
+              height: _8BytesToDouble(body.subarray(24, 32)),
             };
             this.renderingContext.clearRect(x, y, width, height);
+          }
+          break;
+        case kBeginPathTag:
+          {
+            this.renderingContext.beginPath();
+          }
+          break;
+        case kClosePathTag:
+          {
+            this.renderingContext.closePath();
+          }
+          break;
+        case kStrokeTag:
+          {
+            this.renderingContext.stroke();
+          }
+          break;
+        case kFillTag:
+          {
+            this.renderingContext.fill();
+          }
+          break;
+        case kLineToTag:
+          {
+            const { x, y } = {
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+            };
+            this.renderingContext.lineTo(x, y);
+          }
+          break;
+        case kMoveToTag:
+          {
+            const { x, y } = {
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+            };
+            this.renderingContext.moveTo(x, y);
+          }
+          break;
+        case kRectTag:
+          {
+            const { x, y, width, height } = {
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+              width: _8BytesToDouble(body.subarray(16, 24)),
+              height: _8BytesToDouble(body.subarray(24, 32)),
+            };
+            this.renderingContext.rect(x, y, width, height);
+          }
+          break;
+        case kQuadraticCurveToTag:
+          {
+            const { cpx, cpy, x, y } = {
+              cpx: _8BytesToDouble(body.subarray(0, 8)),
+              cpy: _8BytesToDouble(body.subarray(8, 16)),
+              x: _8BytesToDouble(body.subarray(16, 24)),
+              y: _8BytesToDouble(body.subarray(24, 32)),
+            };
+            this.renderingContext.quadraticCurveTo(cpx, cpy, x, y);
+          }
+          break;
+        case kBezierCurveToTag:
+          {
+            const { cp1x, cp1y, cp2x, cp2y, x, y } = {
+              cp1x: _8BytesToDouble(body.subarray(0, 8)),
+              cp1y: _8BytesToDouble(body.subarray(8, 16)),
+              cp2x: _8BytesToDouble(body.subarray(16, 24)),
+              cp2y: _8BytesToDouble(body.subarray(24, 32)),
+              x: _8BytesToDouble(body.subarray(32, 40)),
+              y: _8BytesToDouble(body.subarray(40, 48)),
+            };
+            this.renderingContext.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, x, y);
+          }
+          break;
+        case kArcTag:
+          {
+            const { x, y, r, start, end, anticlockwise } = {
+              x: _8BytesToDouble(body.subarray(0, 8)),
+              y: _8BytesToDouble(body.subarray(8, 16)),
+              r: _8BytesToDouble(body.subarray(16, 24)),
+              start: _8BytesToDouble(body.subarray(24, 32)),
+              end: _8BytesToDouble(body.subarray(32, 40)),
+              anticlockwise: body[40] === 1,
+            };
+            this.renderingContext.arc(x, y, r, start, end, anticlockwise);
+          }
+          break;
+        case kArcToTag:
+          {
+            const { x1, y1, x2, y2, radius } = {
+              x1: _8BytesToDouble(body.subarray(0, 8)),
+              y1: _8BytesToDouble(body.subarray(8, 16)),
+              x2: _8BytesToDouble(body.subarray(16, 24)),
+              y2: _8BytesToDouble(body.subarray(24, 32)),
+              radius: _8BytesToDouble(body.subarray(32, 40)),
+            };
+            this.renderingContext.arcTo(x1, y1, x2, y2, radius);
+          }
+          break;
+        case kClipTag:
+          {
+            this.renderingContext.clip();
           }
           break;
       }

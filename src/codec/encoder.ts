@@ -24,6 +24,20 @@ import {
   kSetShadowColorTag,
   kStrokeRectTag,
   kClearRectTag,
+  kSetLineCapTag,
+  kSetLineJoinTag,
+  kBeginPathTag,
+  kClosePathTag,
+  kStrokeTag,
+  kFillTag,
+  kMoveToTag,
+  kLineToTag,
+  kRectTag,
+  kQuadraticCurveToTag,
+  kBezierCurveToTag,
+  kArcTag,
+  kArcToTag,
+  kClipTag,
 } from "../macros";
 import { intTo2Bytes, doubleTo8Bytes, intTo3Bytes } from "../utils";
 
@@ -147,6 +161,36 @@ export class Encoder {
     frame.push(...doubleTo8Bytes(v));
   }
 
+  setLineCap(v: string) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kSetLineCapTag));
+    frame.push(...intTo2Bytes(1));
+    if (v === "butt") {
+      frame.push(0);
+    } else if (v === "round") {
+      frame.push(1);
+    } else if (v === "square") {
+      frame.push(2);
+    } else {
+      frame.push(0);
+    }
+  }
+
+  setLineJoin(v: string) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kSetLineJoinTag));
+    frame.push(...intTo2Bytes(1));
+    if (v === "round") {
+      frame.push(0);
+    } else if (v === "bevel") {
+      frame.push(1);
+    } else if (v === "miter") {
+      frame.push(2);
+    } else {
+      frame.push(0);
+    }
+  }
+
   setMiterLimit(v: number) {
     const frame = this.frames[this.frames.length - 1];
     frame.push(...intTo2Bytes(kSetMiterLimitTag));
@@ -185,31 +229,146 @@ export class Encoder {
   fillRect(x: number, y: number, width: number, height: number) {
     const frame = this.frames[this.frames.length - 1];
     frame.push(...intTo2Bytes(kFillRectTag));
-    frame.push(...intTo2Bytes(8));
-    frame.push(...intTo2Bytes(x));
-    frame.push(...intTo2Bytes(y));
-    frame.push(...intTo2Bytes(width));
-    frame.push(...intTo2Bytes(height));
+    frame.push(...intTo2Bytes(8 * 4));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+    frame.push(...doubleTo8Bytes(width));
+    frame.push(...doubleTo8Bytes(height));
   }
 
   strokeRect(x: number, y: number, width: number, height: number) {
     const frame = this.frames[this.frames.length - 1];
     frame.push(...intTo2Bytes(kStrokeRectTag));
-    frame.push(...intTo2Bytes(8));
-    frame.push(...intTo2Bytes(x));
-    frame.push(...intTo2Bytes(y));
-    frame.push(...intTo2Bytes(width));
-    frame.push(...intTo2Bytes(height));
+    frame.push(...intTo2Bytes(8 * 4));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+    frame.push(...doubleTo8Bytes(width));
+    frame.push(...doubleTo8Bytes(height));
   }
 
   clearRect(x: number, y: number, width: number, height: number) {
     const frame = this.frames[this.frames.length - 1];
     frame.push(...intTo2Bytes(kClearRectTag));
-    frame.push(...intTo2Bytes(8));
-    frame.push(...intTo2Bytes(x));
-    frame.push(...intTo2Bytes(y));
-    frame.push(...intTo2Bytes(width));
-    frame.push(...intTo2Bytes(height));
+    frame.push(...intTo2Bytes(8 * 4));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+    frame.push(...doubleTo8Bytes(width));
+    frame.push(...doubleTo8Bytes(height));
+  }
+
+  beginPath() {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kBeginPathTag));
+    frame.push(...intTo2Bytes(0));
+  }
+
+  closePath() {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kClosePathTag));
+    frame.push(...intTo2Bytes(0));
+  }
+
+  stroke() {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kStrokeTag));
+    frame.push(...intTo2Bytes(0));
+  }
+
+  fill() {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kFillTag));
+    frame.push(...intTo2Bytes(0));
+  }
+
+  lineTo(x: number, y: number) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kLineToTag));
+    frame.push(...intTo2Bytes(8 * 2));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+  }
+
+  moveTo(x: number, y: number) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kMoveToTag));
+    frame.push(...intTo2Bytes(8 * 2));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+  }
+
+  rect(x: number, y: number, width: number, height: number) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kRectTag));
+    frame.push(...intTo2Bytes(8 * 4));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+    frame.push(...doubleTo8Bytes(width));
+    frame.push(...doubleTo8Bytes(height));
+  }
+
+  quadraticCurveTo(cpx: number, cpy: number, x: number, y: number) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kQuadraticCurveToTag));
+    frame.push(...intTo2Bytes(8 * 4));
+    frame.push(...doubleTo8Bytes(cpx));
+    frame.push(...doubleTo8Bytes(cpy));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+  }
+
+  bezierCurveTo(
+    cp1x: number,
+    cp1y: number,
+    cp2x: number,
+    cp2y: number,
+    x: number,
+    y: number
+  ) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kBezierCurveToTag));
+    frame.push(...intTo2Bytes(8 * 6));
+    frame.push(...doubleTo8Bytes(cp1x));
+    frame.push(...doubleTo8Bytes(cp1y));
+    frame.push(...doubleTo8Bytes(cp2x));
+    frame.push(...doubleTo8Bytes(cp2y));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+  }
+
+  arc(
+    x: number,
+    y: number,
+    r: number,
+    start: number,
+    end: number,
+    anticlockwise: boolean
+  ) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kArcTag));
+    frame.push(...intTo2Bytes(8 * 5 + 1));
+    frame.push(...doubleTo8Bytes(x));
+    frame.push(...doubleTo8Bytes(y));
+    frame.push(...doubleTo8Bytes(r));
+    frame.push(...doubleTo8Bytes(start));
+    frame.push(...doubleTo8Bytes(end));
+    frame.push(anticlockwise ? 1 : 0);
+  }
+
+  arcTo(x1: number, y1: number, x2: number, y2: number, radius: number) {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kArcToTag));
+    frame.push(...intTo2Bytes(8 * 5));
+    frame.push(...doubleTo8Bytes(x1));
+    frame.push(...doubleTo8Bytes(y1));
+    frame.push(...doubleTo8Bytes(x2));
+    frame.push(...doubleTo8Bytes(y2));
+    frame.push(...doubleTo8Bytes(radius));
+  }
+
+  clip() {
+    const frame = this.frames[this.frames.length - 1];
+    frame.push(...intTo2Bytes(kClipTag));
+    frame.push(...intTo2Bytes(0));
   }
 
   endFrame() {
